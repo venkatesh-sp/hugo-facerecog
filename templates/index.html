@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>FaceDetection</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+
+    <!-- Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body>
+    <div>
+      <video playsinline autoplay id="localVideo"></video>
+      <button class="btn btn-primary" id="snap">Snap</button>
+    </div>
+    <div>
+      <canvas id="canvas" width="640" height="480"></canvas>
+      <input type="text" id="user" />
+      <button class="btn btn-primary" id="captured">Submit</button>
+    </div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+      integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+      integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+      crossorigin="anonymous"
+    ></script>
+    <script>
+      var context;
+      navigator.mediaDevices
+        .getUserMedia({ video: true })
+        .then((stream) => onMediaStream(stream))
+        .catch((error) => onMediaError(stream));
+
+      function onMediaStream(stream) {
+        const localVideo = document.getElementById("localVideo");
+        const canvas = document.getElementById("canvas");
+        context = canvas.getContext("2d");
+        localVideo.srcObject = stream;
+      }
+      function onMediaError(error) {
+        console.log(error);
+      }
+      function captureCanvas(event) {
+        event.preventDefault();
+        context.drawImage(localVideo, 0, 0, 640, 480);
+      }
+
+      function submitImage(event) {
+        event.preventDefault();
+        $.ajax({
+          url: "/",
+          type: "POST",
+          data: {
+            name: username.value,
+            image_data: canvas.toDataURL("image/jpeg"),
+          },
+          success: function (result) {
+            console.log("submitted");
+          },
+        });
+      }
+
+      const snap = document.getElementById("snap");
+      snap.addEventListener("click", captureCanvas, false);
+
+      const username = document.getElementById("user");
+
+      const captured = document.getElementById("captured");
+      captured.addEventListener("click", submitImage, false);
+    </script>
+  </body>
+</html>
